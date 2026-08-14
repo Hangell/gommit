@@ -85,6 +85,7 @@ type CommitType struct {
 }
 
 var commitTypes = []CommitType{
+	{"AI", icon("✨", "[AI]"), "Generate type and subject with Gemini"},
 	{"WIP", icon(IconWIP, FAWIP), "Work in progress"},
 	{"feat", icon(IconFeat, FAFeat), "A new feature"},
 	{"fix", icon(IconFix, FAFix), "Fixing a bug"},

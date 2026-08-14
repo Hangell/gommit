@@ -93,6 +93,20 @@ gommit --set-language pt      # save for the current user
 
 Language codes: `en`, `es`, `pt`, `hi`, `ru`, `zh`. English is the default.
 
+On the first installation, Gommit detects the system language and saves it when
+supported. A language explicitly selected with `--set-language` is never overwritten.
+
+### AI auto commit with Gemini
+
+Install and authenticate the official Gemini CLI, then set its standard
+`GEMINI_API_KEY` variable. Gommit also accepts `GEMINI_KEY` as an alias. Select
+`AI` in the type menu (or use `--type AI`) and Gemini will choose the Conventional
+Commit type and generate a technical subject of at most 72 characters.
+
+Only `git diff --cached` is sent, with a 512 KiB limit; binary contents and unstaged
+files are not included. Review staged changes for secrets before using AI. Git/Husky
+hooks still run normally.
+
 Inside a Git repository with changes:
 
 ```bash

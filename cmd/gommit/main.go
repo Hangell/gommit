@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/Hangell/gommit/internal/ai"
 	"github.com/Hangell/gommit/internal/commit"
 	"github.com/Hangell/gommit/internal/git"
 	"github.com/Hangell/gommit/internal/i18n"
@@ -24,6 +25,9 @@ var version = "dev"
 
 func configureLanguage(args []string) {
 	language, _ := git.ConfiguredLanguage()
+	if language == "" {
+		language = i18n.SystemLanguage()
+	}
 	for i, arg := range args {
 		if strings.HasPrefix(arg, "--language=") {
 			language = strings.TrimPrefix(arg, "--language=")
@@ -129,6 +133,9 @@ func main() {
 	}
 	// Installation does not require Git or a gommit configuration.
 	if *doInstall {
+		if saved, _ := git.ConfiguredLanguage(); saved == "" {
+			_ = git.SetConfiguredLanguage(i18n.SystemLanguage())
+		}
 		res, err := install.InstallSelf(version)
 		if err != nil {
 			log.Fatalf("install failed: %v", err)
@@ -255,6 +262,20 @@ func buildOrPromptMessage(typeFlag, scopeFlag, subjectFlag, bodyFlag, footerFlag
 		} else {
 			log.Fatalf("invalid --type '%s'", typeFlag)
 		}
+	}
+	if selected.Key == "AI" {
+		fmt.Println(i18n.T("ai.generating"))
+		suggestion, err := ai.GenerateCommit()
+		if err != nil {
+			log.Fatalf(i18n.T("ai.failed"), err)
+		}
+		generatedType, ok := ui.FindType(suggestion.Type)
+		if !ok || generatedType.Key == "AI" {
+			log.Fatalf(i18n.T("ai.invalid_type"), suggestion.Type)
+		}
+		selected = generatedType
+		subjectFlag = suggestion.Subject
+		fmt.Println(i18n.T("ai.generated", selected.Key, subjectFlag))
 	}
 
 	// SCOPE

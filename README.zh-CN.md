@@ -82,6 +82,16 @@ gommit --set-language zh      # 为当前用户保存
 
 语言代码：`en`、`es`、`pt`、`hi`、`ru`、`zh`。默认语言为英语。
 
+首次安装时，Gommit 会检测并保存系统支持的语言。通过 `--set-language` 设置的
+语言永远不会被覆盖。
+
+### 使用 Gemini 自动提交
+
+安装并认证官方 Gemini CLI，然后设置 `GEMINI_API_KEY`（也支持 `GEMINI_KEY`）。
+在菜单中选择 `AI`，即可仅根据 `git diff --cached`（最大 512 KiB）生成提交类型
+和不超过 72 个字符的技术主题。使用前请检查 stage 中是否有密钥；Git/Husky
+hooks 仍会正常执行。
+
 在有变更的 Git 仓库中：
 
 ```bash

@@ -82,6 +82,16 @@ gommit --set-language es      # guardar para el usuario actual
 
 Códigos: `en`, `es`, `pt`, `hi`, `ru`, `zh`. El idioma predeterminado es inglés.
 
+En la primera instalación, Gommit detecta y guarda el idioma compatible del sistema.
+Una selección con `--set-language` nunca se sobrescribe.
+
+### Commit automático con Gemini
+
+Instale y autentique Gemini CLI y configure `GEMINI_API_KEY` (también se acepta
+`GEMINI_KEY`). Seleccione `AI` para generar el tipo y un asunto técnico de hasta
+72 caracteres usando únicamente `git diff --cached` (máximo 512 KiB). Revise el
+stage para evitar enviar secretos; los hooks Git/Husky se ejecutan normalmente.
+
 Dentro de un repositorio Git con cambios:
 
 ```bash

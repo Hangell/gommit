@@ -2,6 +2,7 @@ package i18n
 
 import (
 	"fmt"
+	"os"
 	"strings"
 )
 
@@ -51,6 +52,15 @@ func Set(language string) bool {
 
 func Language() string  { return current }
 func Supported() string { return "en, es, pt, hi, ru, zh" }
+
+func SystemLanguage() string {
+	for _, value := range []string{systemLocale(), os.Getenv("LC_ALL"), os.Getenv("LC_MESSAGES"), os.Getenv("LANG")} {
+		if language := Normalize(value); language != "" {
+			return language
+		}
+	}
+	return "en"
+}
 
 func T(key string, args ...any) string {
 	text, ok := locales[current][key]
