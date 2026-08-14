@@ -10,7 +10,9 @@ import (
 	"strings"
 	"text/tabwriter"
 
+	"github.com/Hangell/gommit/internal/i18n"
 	"github.com/Hangell/gommit/platform"
+	"golang.org/x/term"
 )
 
 const (
@@ -99,6 +101,10 @@ var commitTypes = []CommitType{
 }
 
 func SelectCommitType() (CommitType, error) {
+	if term.IsTerminal(int(os.Stdin.Fd())) {
+		return selectCommitTypeInteractive()
+	}
+
 	// Se stdin não é TTY (pipe), ainda vamos tentar ler uma linha.
 	reader := bufio.NewReader(os.Stdin)
 
@@ -106,7 +112,7 @@ func SelectCommitType() (CommitType, error) {
 		clearScreen()
 		displayCommitTypes()
 
-		fmt.Print("\n? Select the type of change you're committing: ")
+		fmt.Print("\n" + i18n.T("menu.prompt"))
 		input, err := reader.ReadString('\n')
 		if err != nil {
 			if errors.Is(err, io.EOF) {
@@ -136,7 +142,7 @@ func SelectCommitType() (CommitType, error) {
 		inputLower := strings.ToLower(input)
 		for _, ct := range commitTypes {
 			if strings.Contains(strings.ToLower(ct.Key), inputLower) ||
-				strings.Contains(strings.ToLower(ct.Description), inputLower) {
+				strings.Contains(strings.ToLower(i18n.T("type."+ct.Key)), inputLower) {
 				matches = append(matches, ct)
 			}
 		}
@@ -146,36 +152,99 @@ func SelectCommitType() (CommitType, error) {
 		}
 
 		if len(matches) > 1 {
-			fmt.Printf("\n%s\n", clrDim("Multiple matches found. Please be more specific:"))
+			fmt.Printf("\n%s\n", clrDim(i18n.T("menu.multiple")))
 			w := tabwriter.NewWriter(os.Stdout, 0, 4, 2, ' ', 0)
 			for i, m := range matches {
-				fmt.Fprintf(w, "  %2d)\t%s\t%s\t- %s\n", i+1, clrIcon(m.Icon), clrType(m.Key), m.Description)
+				fmt.Fprintf(w, "  %2d)\t%s\t%s\t- %s\n", i+1, clrIcon(m.Icon), clrType(m.Key), i18n.T("type."+m.Key))
 			}
 			w.Flush()
-			fmt.Print(clrDim("Press Enter to continue..."))
+			fmt.Print(clrDim(i18n.T("menu.continue")))
 			reader.ReadString('\n')
 			continue
 		}
 
-		fmt.Printf("\n%s '%s'. %s\n", clrError("Invalid selection:"), input, clrDim("Please try again."))
-		fmt.Print(clrDim("Press Enter to continue..."))
+		fmt.Printf("\n%s '%s'. %s\n", clrError(i18n.T("menu.invalid")), input, clrDim(i18n.T("menu.retry")))
+		fmt.Print(clrDim(i18n.T("menu.continue")))
 		reader.ReadString('\n')
 	}
 }
 
+func selectCommitTypeInteractive() (CommitType, error) {
+	fd := int(os.Stdin.Fd())
+	oldState, err := term.MakeRaw(fd)
+	if err != nil {
+		return CommitType{}, fmt.Errorf("could not enable keyboard navigation: %w", err)
+	}
+	defer term.Restore(fd, oldState)
+
+	selected := 0
+	fmt.Print("\033[?25l")
+	defer fmt.Print("\033[?25h")
+	renderInteractiveTypes(selected, false)
+
+	one := make([]byte, 1)
+	for {
+		if _, err := os.Stdin.Read(one); err != nil {
+			return CommitType{}, fmt.Errorf("error reading key: %w", err)
+		}
+		switch one[0] {
+		case '\r', '\n':
+			fmt.Print("\r\n")
+			return commitTypes[selected], nil
+		case 'q', 'Q', 3:
+			fmt.Print("\r\n")
+			return CommitType{}, fmt.Errorf("selection aborted by user")
+		case 27:
+			seq := make([]byte, 2)
+			if _, err := io.ReadFull(os.Stdin, seq); err == nil && seq[0] == '[' {
+				if seq[1] == 'A' {
+					selected = (selected - 1 + len(commitTypes)) % len(commitTypes)
+				} else if seq[1] == 'B' {
+					selected = (selected + 1) % len(commitTypes)
+				}
+				renderInteractiveTypes(selected, true)
+			}
+		case 0, 224:
+			if _, err := os.Stdin.Read(one); err == nil {
+				if one[0] == 72 {
+					selected = (selected - 1 + len(commitTypes)) % len(commitTypes)
+				} else if one[0] == 80 {
+					selected = (selected + 1) % len(commitTypes)
+				}
+				renderInteractiveTypes(selected, true)
+			}
+		}
+	}
+}
+
+func renderInteractiveTypes(selected int, redraw bool) {
+	if redraw {
+		fmt.Printf("\033[%dA", len(commitTypes)+3)
+	}
+	fmt.Printf("%s\033[K\r\n\r\n", clrDim(i18n.T("menu.interactive")))
+	for i, ct := range commitTypes {
+		cursor := "  "
+		if i == selected {
+			cursor = "> "
+		}
+		fmt.Printf("%s%s %-10s %s\033[K\r\n", cursor, clrIcon(ct.Icon), clrType(ct.Key), i18n.T("type."+ct.Key))
+	}
+	fmt.Print("\033[K")
+}
+
 func displayCommitTypes() {
-	title := "Select the type of change that you're committing: (Use number, type name, or search)"
+	title := i18n.T("menu.title")
 	fmt.Println(clrDim(title))
 	fmt.Println()
 
 	w := tabwriter.NewWriter(os.Stdout, 0, 4, 2, ' ', 0)
 	for i, ct := range commitTypes {
-		fmt.Fprintf(w, "  %2d)\t%s\t%-10s\t%s\n", i+1, clrIcon(ct.Icon), clrType(ct.Key), ct.Description)
+		fmt.Fprintf(w, "  %2d)\t%s\t%-10s\t%s\n", i+1, clrIcon(ct.Icon), clrType(ct.Key), i18n.T("type."+ct.Key))
 	}
 	w.Flush()
 
 	fmt.Println()
-	fmt.Println(clrDim("(You can type: number, commit type name, or search term — or 'q' to quit)"))
+	fmt.Println(clrDim(i18n.T("menu.hint")))
 }
 
 func clearScreen() {

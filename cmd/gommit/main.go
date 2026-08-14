@@ -4,42 +4,87 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"flag"
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/Hangell/gommit/internal/commit"
 	"github.com/Hangell/gommit/internal/git"
+	"github.com/Hangell/gommit/internal/i18n"
 	"github.com/Hangell/gommit/internal/install"
 	"github.com/Hangell/gommit/internal/ui"
+	gommitupdate "github.com/Hangell/gommit/internal/update"
 )
 
 var version = "dev"
 
+func configureLanguage(args []string) {
+	language, _ := git.ConfiguredLanguage()
+	for i, arg := range args {
+		if strings.HasPrefix(arg, "--language=") {
+			language = strings.TrimPrefix(arg, "--language=")
+		}
+		if arg == "--language" && i+1 < len(args) {
+			language = args[i+1]
+		}
+	}
+	if language != "" {
+		i18n.Set(language)
+	}
+}
+
 func main() {
+	if len(os.Args) == 5 && os.Args[1] == "--apply-update" {
+		pid, err := strconv.Atoi(os.Args[2])
+		if err != nil {
+			log.Fatalf("invalid updater parent PID: %v", err)
+		}
+		if err := gommitupdate.Apply(pid, os.Args[3], os.Args[4]); err != nil {
+			log.Fatalf("update installation failed: %v", err)
+		}
+		return
+	}
+	configureLanguage(os.Args[1:])
+
 	fs := flag.NewFlagSet("gommit", flag.ContinueOnError)
-	showVersion := fs.Bool("version", false, "print version and exit")
-	doInstall := fs.Bool("install", false, "install or update gommit into your user bin and exit")
-	dryRun := fs.Bool("dry-run", false, "print the message and exit (do not run git commit)")
+	showVersion := fs.Bool("version", false, i18n.T("help.version"))
+	doInstall := fs.Bool("install", false, i18n.T("help.install"))
+	doUpdate := fs.Bool("update", false, i18n.T("help.update"))
+	dryRun := fs.Bool("dry-run", false, i18n.T("help.dry_run"))
+	modeFlag := fs.String("mode", "", i18n.T("help.mode"))
+	setMode := fs.String("set-mode", "", i18n.T("help.set_mode"))
+	languageFlag := fs.String("language", "", i18n.T("help.language"))
+	setLanguage := fs.String("set-language", "", i18n.T("help.set_language"))
 
-	typeFlag := fs.String("type", "", "commit type (feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert; extras: WIP, prune)")
-	scopeFlag := fs.String("scope", "", "optional scope (e.g. ui, api, editor)")
-	subjectFlag := fs.String("subject", "", "commit subject (imperative, <=72 chars)")
-	bodyFlag := fs.String("body", "", "commit body (use \\n for new lines if provided by flag)")
-	footerFlag := fs.String("footer", "", "commit footer (e.g. Closes #123; BREAKING CHANGE: ...)")
-	asEditor := fs.Bool("as-editor", false, "run as Git editor (writes COMMIT_EDITMSG)")
+	typeFlag := fs.String("type", "", i18n.T("help.type"))
+	scopeFlag := fs.String("scope", "", i18n.T("help.scope"))
+	subjectFlag := fs.String("subject", "", i18n.T("help.subject"))
+	bodyFlag := fs.String("body", "", i18n.T("help.body"))
+	footerFlag := fs.String("footer", "", i18n.T("help.footer"))
+	asEditor := fs.Bool("as-editor", false, i18n.T("help.editor"))
 
-	allowEmpty := fs.Bool("allow-empty", false, "allow an empty commit")
-	amend := fs.Bool("amend", false, "amend the previous commit")
-	noVerify := fs.Bool("no-verify", false, "bypass pre-commit and commit-msg hooks")
-	signoff := fs.Bool("signoff", false, "add Signed-off-by trailer")
-	autoStage := fs.Bool("auto-stage", true, "auto stage all changes (git add -A) when nothing staged")
-	showStatus := fs.Bool("show-status", true, "print staged changes summary before committing")
+	allowEmpty := fs.Bool("allow-empty", false, i18n.T("help.allow_empty"))
+	amend := fs.Bool("amend", false, i18n.T("help.amend"))
+	noVerify := fs.Bool("no-verify", false, i18n.T("help.no_verify"))
+	signoff := fs.Bool("signoff", false, i18n.T("help.signoff"))
+	autoStage := fs.Bool("auto-stage", true, i18n.T("help.auto_stage"))
+	showStatus := fs.Bool("show-status", true, i18n.T("help.show_status"))
+	fs.Lookup("auto-stage").DefValue = ""
+	fs.Lookup("show-status").DefValue = ""
+	fs.Usage = func() {
+		fmt.Fprintln(fs.Output(), i18n.T("help.usage"))
+		fs.PrintDefaults()
+	}
 
 	fs.SetOutput(os.Stderr)
 	if err := fs.Parse(os.Args[1:]); err != nil {
+		if errors.Is(err, flag.ErrHelp) {
+			return
+		}
 		os.Exit(2)
 	}
 
@@ -47,8 +92,42 @@ func main() {
 		fmt.Println("gommit version", version)
 		return
 	}
-
-	// ===== INSTALAÇÃO =====
+	if *languageFlag != "" {
+		language := i18n.Normalize(*languageFlag)
+		if language == "" {
+			log.Fatalf(i18n.T("language.invalid"), *languageFlag, i18n.Supported())
+		}
+		i18n.Set(language) // help was already localized by configureLanguage
+	}
+	if *setLanguage != "" {
+		language := i18n.Normalize(*setLanguage)
+		if language == "" {
+			log.Fatalf(i18n.T("language.invalid"), *setLanguage, i18n.Supported())
+		}
+		if err := git.SetConfiguredLanguage(language); err != nil {
+			log.Fatal(err)
+		}
+		i18n.Set(language)
+		fmt.Println(i18n.T("language.saved", language))
+		return
+	}
+	if *doUpdate {
+		message, err := gommitupdate.Start(version)
+		if err != nil {
+			log.Fatalf("update failed: %v", err)
+		}
+		fmt.Println(message)
+		return
+	}
+	if *setMode != "" {
+		mode := strings.ToLower(strings.TrimSpace(*setMode))
+		if err := git.SetConfiguredMode(mode); err != nil {
+			log.Fatalf("could not save mode: %v", err)
+		}
+		fmt.Println(i18n.T("mode.saved", mode))
+		return
+	}
+	// Installation does not require Git or a gommit configuration.
 	if *doInstall {
 		res, err := install.InstallSelf(version)
 		if err != nil {
@@ -58,13 +137,28 @@ func main() {
 		return
 	}
 
+	mode := strings.ToLower(strings.TrimSpace(*modeFlag))
+	if mode == "" {
+		var err error
+		mode, err = git.ConfiguredMode()
+		if err != nil {
+			log.Fatalf("could not read gommit.mode: %v", err)
+		}
+		if mode == "" {
+			mode = "simple"
+		}
+	}
+	if mode != "simple" && mode != "full" {
+		log.Fatalf(i18n.T("mode.invalid"), mode)
+	}
+
 	// ===== editor mode =====
 	if *asEditor {
 		if fs.NArg() < 1 {
 			log.Fatal("editor mode: missing COMMIT_EDITMSG path")
 		}
 		path := fs.Arg(0)
-		msg := buildOrPromptMessage(*typeFlag, *scopeFlag, *subjectFlag, *bodyFlag, *footerFlag, true)
+		msg := buildOrPromptMessage(*typeFlag, *scopeFlag, *subjectFlag, *bodyFlag, *footerFlag, true, mode)
 		if err := git.WriteCommitEditMsg(path, msg); err != nil {
 			log.Fatalf("failed to write commit message: %v", err)
 		}
@@ -79,9 +173,9 @@ func main() {
 	// ===== staged / auto-stage / amend =====
 	if *amend {
 		if subj, err := git.LastCommitSubject(); err == nil && subj != "" {
-			fmt.Printf("Amend mode: last commit → %s\n", subj)
+			fmt.Println(i18n.T("amend.last", subj))
 		} else {
-			fmt.Println("Amend mode: last commit will be updated.")
+			fmt.Println(i18n.T("amend.update"))
 		}
 	}
 	if !*allowEmpty && !*amend {
@@ -96,13 +190,13 @@ func main() {
 			}
 			if dirty {
 				if *autoStage {
-					fmt.Println("No staged changes detected. Running: git add -A")
+					fmt.Println(i18n.T("autostage"))
 					if err := git.StageAll(); err != nil {
 						log.Fatalf("git add -A failed: %v", err)
 					}
 					if *showStatus {
 						if sum, err := git.StagedSummary(); err == nil && strings.TrimSpace(sum) != "" {
-							fmt.Println("\nStaged changes:\n" + strings.TrimRight(sum, "\n"))
+							fmt.Println("\n" + i18n.T("staged") + "\n" + strings.TrimRight(sum, "\n"))
 						}
 					}
 				} else {
@@ -113,18 +207,18 @@ func main() {
 			}
 		} else if *showStatus {
 			if sum, err := git.StagedSummary(); err == nil && strings.TrimSpace(sum) != "" {
-				fmt.Println("Staged changes:\n" + strings.TrimRight(sum, "\n"))
+				fmt.Println(i18n.T("staged") + "\n" + strings.TrimRight(sum, "\n"))
 			}
 		}
 	}
 
 	// ===== wizard / mensagem =====
-	msg := buildOrPromptMessage(*typeFlag, *scopeFlag, *subjectFlag, *bodyFlag, *footerFlag, false)
+	msg := buildOrPromptMessage(*typeFlag, *scopeFlag, *subjectFlag, *bodyFlag, *footerFlag, false, mode)
 
 	if *dryRun {
 		fmt.Println()
 		fmt.Println("────────────────────────────────────────────────")
-		fmt.Println("Commit message preview:")
+		fmt.Println(i18n.T("preview"))
 		fmt.Println("────────────────────────────────────────────────")
 		fmt.Println(msg)
 		return
@@ -139,11 +233,14 @@ func main() {
 	}); err != nil {
 		log.Fatalf("git commit failed: %v", err)
 	}
+	if notice := gommitupdate.Notice(version); notice != "" {
+		fmt.Println(notice)
+	}
 }
 
 // --- wizard / montagem ---------------------------------------------------
 
-func buildOrPromptMessage(typeFlag, scopeFlag, subjectFlag, bodyFlag, footerFlag string, quiet bool) string {
+func buildOrPromptMessage(typeFlag, scopeFlag, subjectFlag, bodyFlag, footerFlag string, quiet bool, mode string) string {
 	// TYPE
 	var selected ui.CommitType
 	if typeFlag == "" {
@@ -162,14 +259,18 @@ func buildOrPromptMessage(typeFlag, scopeFlag, subjectFlag, bodyFlag, footerFlag
 
 	// SCOPE
 	scope := scopeFlag
-	if scope == "" && !quiet {
-		scope = promptLine("Scope (optional, Enter to skip): ")
+	if scope == "" && !quiet && mode == "full" {
+		scope = promptLine(i18n.T("prompt.scope"))
 	}
 
 	// SUBJECT
 	subject := subjectFlag
 	if subject == "" {
-		subject = promptLine("Subject (required, imperative, <=72 chars): ")
+		label := i18n.T("prompt.subject")
+		if mode == "simple" {
+			label = i18n.T("prompt.description")
+		}
+		subject = promptLine(label)
 	}
 	subject = strings.TrimSpace(subject)
 	if subject == "" {
@@ -181,26 +282,26 @@ func buildOrPromptMessage(typeFlag, scopeFlag, subjectFlag, bodyFlag, footerFlag
 
 	// BODY
 	body := unescapeNewlines(bodyFlag)
-	if body == "" && !quiet {
-		fmt.Println("Body (optional, multiline). Finish with a single '.' on a new line, or press Enter twice:")
+	if body == "" && !quiet && mode == "full" {
+		fmt.Println(i18n.T("prompt.body"))
 		body = readMultiline()
 	}
 
 	// Breaking changes?
 	breaking := false
 	breakingDesc := ""
-	if !quiet {
-		breaking = promptYesNo("Are there any breaking changes?", false)
+	if !quiet && mode == "full" {
+		breaking = promptYesNo(i18n.T("prompt.breaking"), false)
 		if breaking {
-			breakingDesc = promptLine("Describe the breaking change: ")
+			breakingDesc = promptLine(i18n.T("prompt.breaking_desc"))
 		}
 	}
 
 	// Issues (Closes / Refs)?
 	var closes, refs []string
-	if !quiet && promptYesNo("Does this change affect any open issues?", false) {
-		c := promptLine("Issues to close (comma, ex: 12,45) — Enter to skip: ")
-		r := promptLine("Issues to reference (comma, ex: 7,9) — Enter to skip: ")
+	if !quiet && mode == "full" && promptYesNo(i18n.T("prompt.issues"), false) {
+		c := promptLine(i18n.T("prompt.closes"))
+		r := promptLine(i18n.T("prompt.refs"))
 		closes = splitCSVNums(c)
 		refs = splitCSVNums(r)
 	}

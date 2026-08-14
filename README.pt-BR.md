@@ -71,21 +71,37 @@ gommit --version
 
 ## 💻 Uso Rápido
 
+### Idioma da interface
+
+Comandos e flags continuam em inglês. Menus, descrições, perguntas e o `--help`
+podem ser exibidos em inglês, espanhol, português, hindi, russo ou chinês:
+
+```bash
+gommit --language pt          # somente nesta execução
+gommit --set-language pt      # salva para o usuário atual
+```
+
+Códigos: `en`, `es`, `pt`, `hi`, `ru`, `zh`. O padrão é inglês.
+
 Dentro de um repositório Git com mudanças:
 
 ```bash
 gommit
 ```
 
-Fluxo típico do assistente:
-1. Selecione o **tipo** (número, nome ou busca)
-2. Digite o **scope** (opcional)
-3. Escreva o **subject** (modo imperativo, `<=72` chars)
-4. Adicione o **body** (opcional, multilinha) – termine com `.` em uma linha **ou** pressione Enter **duas vezes**
-5. **Mudanças breaking?** (se "sim", descreva a mudança)
-6. **Issues?** (Closes/Refs)
+O modo simples é o padrão:
+1. Selecione o **tipo** usando `↑`/`↓` e confirme com Enter.
+2. Descreva a mudança uma única vez e pressione Enter.
 
-No final, `gommit` executa `git commit` (ou mostra preview com `--dry-run`).
+Para usar temporariamente o assistente completo antigo, execute `gommit --mode full`.
+Para salvá-lo como preferência do usuário, execute `gommit --set-mode full`. Volte ao
+fluxo simples com `gommit --set-mode simple`. A preferência é armazenada em
+`git config --global gommit.mode`.
+
+No final, `gommit` executa `git commit` normalmente, portanto hooks do Git, Husky e
+`commit-msg` são respeitados. Eles só são ignorados quando `--no-verify` é informado.
+Após um commit bem-sucedido, o Gommit verifica atualizações no máximo uma vez a cada
+24 horas. Se houver uma nova release, ele apenas avisa; o commit nunca é bloqueado.
 
 ### Exemplos
 
@@ -107,6 +123,11 @@ gommit --amend
 Mostrar apenas a mensagem (não commitar):
 ```bash
 gommit --dry-run
+```
+
+Baixar e instalar a release mais recente no equipamento:
+```bash
+gommit --update
 ```
 
 Passar tudo via flags (sem assistente):
@@ -144,7 +165,12 @@ refactor(core)! 🎨: unificar message builder
 |---|---|
 | `--version` | Mostra versão e sai |
 | `--install` | Instala/atualiza binário no PATH do usuário e sai |
+| `--update` | Baixa e instala a release mais recente do GitHub |
 | `--dry-run` | Apenas imprime a mensagem gerada (não chama `git commit`) |
+| `--language` | Usa `en`, `es`, `pt`, `hi`, `ru` ou `zh` nesta execução |
+| `--set-language` | Salva globalmente o idioma da interface do usuário |
+| `--mode` | Usa `simple` ou `full` somente nesta execução |
+| `--set-mode` | Salva `simple` ou `full` como padrão global do usuário |
 | `--type` | Tipo do commit (feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert, WIP, prune) |
 | `--scope` | Scope opcional (ex: `ui`, `api`) |
 | `--subject` | Linha de assunto (modo imperativo, `<=72` chars) |

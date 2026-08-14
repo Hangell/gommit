@@ -81,21 +81,36 @@ gommit --version
 
 ## 💻 Quick Usage
 
+### Interface language
+
+Commands and flags remain in English, while menus, descriptions, prompts and `--help`
+can use English, Spanish, Portuguese, Hindi, Russian or Chinese:
+
+```bash
+gommit --language pt          # only this run
+gommit --set-language pt      # save for the current user
+```
+
+Language codes: `en`, `es`, `pt`, `hi`, `ru`, `zh`. English is the default.
+
 Inside a Git repository with changes:
 
 ```bash
 gommit
 ```
 
-Typical wizard flow:
-1. Select **type** (number, name, or search)
-2. Enter **scope** (optional)
-3. Write **subject** (imperative mood, `<=72` chars)
-4. Add **body** (optional, multiline) – end with `.` on a line **or** press Enter **twice**
-5. **Breaking changes?** (if "yes", describe the change)
-6. **Issues?** (Closes/Refs)
+Simple mode is the default:
+1. Select the **type** with `↑`/`↓` and confirm with Enter.
+2. Describe the change once and press Enter.
 
-At the end, `gommit` executes `git commit` (or shows preview with `--dry-run`).
+Run `gommit --mode full` to use the previous full wizard once. Save it as the user
+default with `gommit --set-mode full`, or return to the simple flow with
+`gommit --set-mode simple`. The preference is stored in `git config --global gommit.mode`.
+
+At the end, `gommit` runs `git commit` normally, so Git hooks, Husky, and `commit-msg`
+hooks run as usual. They are skipped only when `--no-verify` is explicitly passed.
+After a successful commit, Gommit checks for updates at most once every 24 hours.
+When a release is available it only prints a notice; the commit is never blocked.
 
 ### Examples
 
@@ -117,6 +132,11 @@ gommit --amend
 Show message only (don't commit):
 ```bash
 gommit --dry-run
+```
+
+Download and install the latest release on this machine:
+```bash
+gommit --update
 ```
 
 Pass everything via flags (no wizard):
@@ -154,7 +174,12 @@ refactor(core)! 🎨: unify message builder
 |---|---|
 | `--version` | Show version and exit |
 | `--install` | Install/update binary to user PATH and exit |
+| `--update` | Download and install the latest GitHub release |
 | `--dry-run` | Only print the generated message (don't call `git commit`) |
+| `--language` | Use `en`, `es`, `pt`, `hi`, `ru` or `zh` for this run |
+| `--set-language` | Save the user's global interface language |
+| `--mode` | Use `simple` or `full` for this run only |
+| `--set-mode` | Save `simple` or `full` as the user's global default |
 | `--type` | Commit type (feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert, WIP, prune) |
 | `--scope` | Optional scope (e.g., `ui`, `api`) |
 | `--subject` | Subject line (imperative mood, `<=72` chars) |

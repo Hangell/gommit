@@ -70,6 +70,18 @@ gommit --version
 
 ## 💻 Uso Rápido
 
+### Idioma de la interfaz
+
+Los comandos y flags permanecen en inglés. Los menús, descripciones, preguntas y
+`--help` pueden mostrarse en inglés, español, portugués, hindi, ruso o chino:
+
+```bash
+gommit --language es          # solo en esta ejecución
+gommit --set-language es      # guardar para el usuario actual
+```
+
+Códigos: `en`, `es`, `pt`, `hi`, `ru`, `zh`. El idioma predeterminado es inglés.
+
 Dentro de un repositorio Git con cambios:
 
 ```bash
@@ -144,6 +156,8 @@ refactor(core)! 🎨: unificar message builder
 | `--version` | Muestra versión y sale |
 | `--install` | Instala/actualiza binario en el PATH del usuario y sale |
 | `--dry-run` | Solo imprime el mensaje generado (no llama a `git commit`) |
+| `--language` | Usa `en`, `es`, `pt`, `hi`, `ru` o `zh` en esta ejecución |
+| `--set-language` | Guarda globalmente el idioma de la interfaz |
 | `--type` | Tipo de commit (feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert, WIP, prune) |
 | `--scope` | Scope opcional (ej: `ui`, `api`) |
 | `--subject` | Línea de asunto (modo imperativo, `<=72` chars) |

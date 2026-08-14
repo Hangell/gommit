@@ -28,6 +28,7 @@ const (
 
 	// Flags de console
 	ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004
+	ENABLE_VIRTUAL_TERMINAL_INPUT      = 0x0200
 
 	// Code page
 	CP_UTF8 = 65001
@@ -42,6 +43,18 @@ func setupWindowsConsole() {
 	setConsoleInputCP(CP_UTF8)          // <- entrada também em UTF-8
 	enableVTOnHandle(STD_OUTPUT_HANDLE) // stdout com ANSI/VT100
 	enableVTOnHandle(STD_ERROR_HANDLE)  // stderr idem
+	enableVTInput()
+}
+
+func enableVTInput() {
+	h, _, _ := procGetStdHandle.Call(STD_INPUT_HANDLE)
+	if h == 0 || h == uintptr(syscall.InvalidHandle) {
+		return
+	}
+	var mode uint32
+	if r1, _, _ := procGetConsoleMode.Call(h, uintptr(unsafe.Pointer(&mode))); r1 != 0 {
+		procSetConsoleMode.Call(h, uintptr(mode|ENABLE_VIRTUAL_TERMINAL_INPUT))
+	}
 }
 
 func setConsoleOutputCP(codePage uint32) {

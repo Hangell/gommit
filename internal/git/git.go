@@ -2,9 +2,46 @@ package git
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 )
+
+const configModeKey = "gommit.mode"
+const configLanguageKey = "gommit.language"
+
+func ConfiguredLanguage() (string, error) { return globalConfig(configLanguageKey) }
+func SetConfiguredLanguage(language string) error {
+	cmd := exec.Command("git", "config", "--global", configLanguageKey, language)
+	cmd.Stdout, cmd.Stderr = os.Stdout, os.Stderr
+	return cmd.Run()
+}
+
+func ConfiguredMode() (string, error) {
+	return globalConfig(configModeKey)
+}
+
+func globalConfig(key string) (string, error) {
+	out, err := exec.Command("git", "config", "--global", "--get", key).Output()
+	if err != nil {
+		if ee, ok := err.(*exec.ExitError); ok && ee.ExitCode() == 1 {
+			return "", nil
+		}
+		return "", err
+	}
+	return strings.TrimSpace(string(out)), nil
+}
+
+func SetConfiguredMode(mode string) error {
+	if mode != "simple" && mode != "full" {
+		return fmt.Errorf("invalid mode %q (use simple or full)", mode)
+	}
+	cmd := exec.Command("git", "config", "--global", configModeKey, mode)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
+}
 
 type Options struct {
 	AllowEmpty bool

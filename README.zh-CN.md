@@ -70,6 +70,18 @@ gommit --version
 
 ## 💻 快速使用
 
+### 界面语言
+
+命令和 flags 始终保持英文。菜单、说明、提示和 `--help` 可显示为英语、西班牙语、
+葡萄牙语、印地语、俄语或中文：
+
+```bash
+gommit --language zh          # 仅本次运行
+gommit --set-language zh      # 为当前用户保存
+```
+
+语言代码：`en`、`es`、`pt`、`hi`、`ru`、`zh`。默认语言为英语。
+
 在有变更的 Git 仓库中：
 
 ```bash
@@ -146,6 +158,8 @@ refactor(core)! 🎨: 统一消息构建器
 | `--version` | 显示版本并退出 |
 | `--install` | 安装/更新二进制到用户 PATH 后退出 |
 | `--dry-run` | 仅打印生成的消息（不执行 `git commit`） |
+| `--language` | 本次运行使用 `en`、`es`、`pt`、`hi`、`ru` 或 `zh` |
+| `--set-language` | 保存用户的全局界面语言 |
 | `--type` | 提交类型（feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert, WIP, prune） |
 | `--scope` | 可选作用域（如 `ui`、`api`） |
 | `--subject` | 标题（祈使语气，`<=72` 字符） |
