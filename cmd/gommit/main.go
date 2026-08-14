@@ -12,7 +12,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/Hangell/gommit/internal/ai"
 	"github.com/Hangell/gommit/internal/commit"
 	"github.com/Hangell/gommit/internal/git"
 	"github.com/Hangell/gommit/internal/i18n"
@@ -263,21 +262,6 @@ func buildOrPromptMessage(typeFlag, scopeFlag, subjectFlag, bodyFlag, footerFlag
 			log.Fatalf("invalid --type '%s'", typeFlag)
 		}
 	}
-	if selected.Key == "AI" {
-		fmt.Println(i18n.T("ai.generating"))
-		suggestion, err := ai.GenerateCommit()
-		if err != nil {
-			log.Fatalf(i18n.T("ai.failed"), err)
-		}
-		generatedType, ok := ui.FindType(suggestion.Type)
-		if !ok || generatedType.Key == "AI" {
-			log.Fatalf(i18n.T("ai.invalid_type"), suggestion.Type)
-		}
-		selected = generatedType
-		subjectFlag = suggestion.Subject
-		fmt.Println(i18n.T("ai.generated", selected.Key, subjectFlag))
-	}
-
 	// SCOPE
 	scope := scopeFlag
 	if scope == "" && !quiet && mode == "full" {

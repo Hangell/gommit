@@ -85,7 +85,6 @@ type CommitType struct {
 }
 
 var commitTypes = []CommitType{
-	{"AI", icon("✨", "[AI]"), "Generate type and subject with Gemini"},
 	{"WIP", icon(IconWIP, FAWIP), "Work in progress"},
 	{"feat", icon(IconFeat, FAFeat), "A new feature"},
 	{"fix", icon(IconFix, FAFix), "Fixing a bug"},
@@ -181,7 +180,7 @@ func selectCommitTypeInteractive() (CommitType, error) {
 	selected := 0
 	fmt.Print("\033[?25l")
 	defer fmt.Print("\033[?25h")
-	renderInteractiveTypes(selected, false)
+	renderInteractiveTypes(selected)
 
 	one := make([]byte, 1)
 	for {
@@ -203,7 +202,7 @@ func selectCommitTypeInteractive() (CommitType, error) {
 				} else if seq[1] == 'B' {
 					selected = (selected + 1) % len(commitTypes)
 				}
-				renderInteractiveTypes(selected, true)
+				renderInteractiveTypes(selected)
 			}
 		case 0, 224:
 			if _, err := os.Stdin.Read(one); err == nil {
@@ -212,16 +211,14 @@ func selectCommitTypeInteractive() (CommitType, error) {
 				} else if one[0] == 80 {
 					selected = (selected + 1) % len(commitTypes)
 				}
-				renderInteractiveTypes(selected, true)
+				renderInteractiveTypes(selected)
 			}
 		}
 	}
 }
 
-func renderInteractiveTypes(selected int, redraw bool) {
-	if redraw {
-		fmt.Printf("\033[%dA", len(commitTypes)+3)
-	}
+func renderInteractiveTypes(selected int) {
+	clearScreen()
 	fmt.Printf("%s\033[K\r\n\r\n", clrDim(i18n.T("menu.interactive")))
 	for i, ct := range commitTypes {
 		cursor := "  "
@@ -249,7 +246,8 @@ func displayCommitTypes() {
 }
 
 func clearScreen() {
-	fmt.Print("\033[H\033[2J")
+	// Clear both the visible screen and scrollback, then place the cursor at the top.
+	fmt.Print("\033[2J\033[3J\033[H")
 }
 
 func icon(emoji, fallback string) string {

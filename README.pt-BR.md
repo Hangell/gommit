@@ -86,17 +86,6 @@ Códigos: `en`, `es`, `pt`, `hi`, `ru`, `zh`. O padrão é inglês.
 Na primeira instalação, o Gommit detecta e salva o idioma do sistema quando houver
 suporte. Uma escolha feita com `--set-language` nunca é sobrescrita.
 
-### Commit automático com Gemini
-
-Instale e autentique o Gemini CLI oficial e configure `GEMINI_API_KEY`. O Gommit
-também aceita `GEMINI_KEY` como apelido. Selecione `AI` no menu de tipos (ou use
-`--type AI`); o Gemini escolherá o tipo Conventional Commit e criará um assunto
-técnico com no máximo 72 caracteres.
-
-Somente `git diff --cached` é enviado, com limite de 512 KiB; conteúdo binário e
-arquivos fora do stage não são incluídos. Revise o stage para evitar o envio de
-segredos. Os hooks Git/Husky continuam sendo executados normalmente.
-
 Dentro de um repositório Git com mudanças:
 
 ```bash
