@@ -43,6 +43,16 @@ func EmojiFor(key string) string {
 		return IconStyle
 	case "revert":
 		return IconRevert
+	case "security":
+		return IconSecurity
+	case "deps":
+		return IconDeps
+	case "i18n":
+		return IconI18n
+	case "typo":
+		return IconTypo
+	case "breaking":
+		return IconBreaking
 	default:
 		return ""
 	}

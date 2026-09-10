@@ -11,7 +11,7 @@
 
 - ✅ 交互式向导，支持搜索/快捷键（数字、关键字、`q` 退出）
 - ✅ 标准 Conventional Commits 类型：**feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert**  
-  以及额外类型：**WIP, prune**
+  以及额外类型：**WIP, prune, security, deps, i18n, typo, breaking**
 - ✅ 菜单表情（自动 ASCII 回退）与 **标题表情**
 - ✅ Git 预检查：
   - 仓库校验（若不是 Git 仓库则给出 `not a git repository…`）
@@ -147,7 +147,7 @@ gommit --type fix --scope api --subject "修复认证问题" --body "修复 JWT 
 ```
 feat 💡: 添加安装命令
 fix(api) 🐛: 修正配置加载中的空指针
-refactor(core)! 🎨: 统一消息构建器
+refactor(core)! 🦉: 统一消息构建器
 ```
 
 > `!` 只出现在**标题**里；内部校验仍使用“纯类型”（`feat`、`fix` 等），与 Conventional Commits 工具保持兼容。
@@ -163,7 +163,7 @@ refactor(core)! 🎨: 统一消息构建器
 | `--dry-run` | 仅打印生成的消息（不执行 `git commit`） |
 | `--language` | 本次运行使用 `en`、`es`、`pt`、`hi`、`ru` 或 `zh` |
 | `--set-language` | 保存用户的全局界面语言 |
-| `--type` | 提交类型（feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert, WIP, prune） |
+| `--type` | 提交类型（feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert, WIP, prune, security, deps, i18n, typo, breaking） |
 | `--scope` | 可选作用域（如 `ui`、`api`） |
 | `--subject` | 标题（祈使语气，`<=72` 字符） |
 | `--body` | 正文文本（用 `
@@ -187,15 +187,20 @@ refactor(core)! 🎨: 统一消息构建器
 | `feat` | 💡 | 新功能 |
 | `fix` | 🐛 | 修复 Bug |
 | `chore` | 📦 | 依赖、部署、配置等更新 |
-| `refactor` | 🎨 | 重构（不改变行为） |
+| `refactor` | 🦉 | 重构（不改变行为） |
 | `prune` | 🔥 | 删除代码或文件 |
 | `docs` | 📝 | 文档 |
 | `perf` | ⚡ | 性能优化 |
 | `test` | ✅ | 测试 |
 | `build` | 🔧 | 构建系统/依赖变更 |
 | `ci` | 🤖 | CI/CD 配置变更 |
-| `style` | 💅 | 代码风格（不影响含义） |
-| `revert` | ⏪ | 回退提交 |
+| `style` | 🎨 | 代码风格（不影响含义） |
+| `revert` | ◀️ | 回退提交 |
+| `security` | 🔒 | 修复安全问题 |
+| `deps` | ⬆️ | 升级或降级依赖 |
+| `i18n` | 🌐 | 国际化和本地化 |
+| `typo` | ✏️ | 修正拼写错误 |
+| `breaking` | 💥 | 破坏兼容性的更改 |
 
 ---
 

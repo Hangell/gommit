@@ -21,7 +21,7 @@ It opens an interactive wizard (similar to Commitizen/cz) and executes `git comm
 
 - ✅ Interactive wizard with search/shortcuts (numbers, keywords, `q` to quit)
 - ✅ Standard Conventional Commits types: **feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert**  
-  Plus extras: **WIP, prune**
+  Plus extras: **WIP, prune, security, deps, i18n, typo, breaking**
 - ✅ Emojis in menu (with automatic ASCII fallback) and **emoji in commit header**
 - ✅ Git pre-checks:
   - Repository validation (`not a git repository…` if not in one)
@@ -164,7 +164,7 @@ Examples:
 ```
 feat 💡: add install command
 fix(api) 🐛: correct nil pointer on config load
-refactor(core)! 🎨: unify message builder
+refactor(core)! 🦉: unify message builder
 ```
 
 > The `!` appears only in the **header**; internal validation uses the "pure" type (`feat`, `fix`, etc.) to maintain compatibility with Conventional Commits tools.
@@ -183,7 +183,7 @@ refactor(core)! 🎨: unify message builder
 | `--set-language` | Save the user's global interface language |
 | `--mode` | Use `simple` or `full` for this run only |
 | `--set-mode` | Save `simple` or `full` as the user's global default |
-| `--type` | Commit type (feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert, WIP, prune) |
+| `--type` | Commit type (feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert, WIP, prune, security, deps, i18n, typo, breaking) |
 | `--scope` | Optional scope (e.g., `ui`, `api`) |
 | `--subject` | Subject line (imperative mood, `<=72` chars) |
 | `--body` | Body text (use `\n` for new lines) |
@@ -206,15 +206,20 @@ refactor(core)! 🎨: unify message builder
 | `feat` | 💡 | A new feature |
 | `fix` | 🐛 | Fixing a bug |
 | `chore` | 📦 | Updating dependencies, deployments, configuration files |
-| `refactor` | 🎨 | Improving structure/format of the code |
+| `refactor` | 🦉 | Improving structure/format of the code |
 | `prune` | 🔥 | Removing code or files |
 | `docs` | 📝 | Writing documentation |
 | `perf` | ⚡ | Improving performance |
 | `test` | ✅ | Adding tests |
 | `build` | 🔧 | Changes to build system or dependencies |
 | `ci` | 🤖 | Changes to CI/CD configuration |
-| `style` | 💅 | Changes that do not affect the meaning of the code |
-| `revert` | ⏪ | Revert to a commit |
+| `style` | 🎨 | Changes that do not affect the meaning of the code |
+| `revert` | ◀️ | Revert to a commit |
+| `security` | 🔒 | Fix security issues |
+| `deps` | ⬆️ | Upgrade or downgrade dependencies |
+| `i18n` | 🌐 | Internationalization and localization |
+| `typo` | ✏️ | Fix typos |
+| `breaking` | 💥 | Changes that break compatibility |
 
 ---
 

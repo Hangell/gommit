@@ -21,14 +21,19 @@ const (
 	IconFeat     = "💡"
 	IconFix      = "🐛"
 	IconDocs     = "📝"
-	IconStyle    = "💅"
-	IconRefactor = "🎨"
+	IconStyle    = "🎨"
+	IconRefactor = "🦉"
 	IconPerf     = "⚡"
 	IconTest     = "✅"
 	IconBuild    = "🔧"
 	IconCI       = "🤖"
 	IconChore    = "📦"
-	IconRevert   = "⏪"
+	IconRevert   = "◀️"
+	IconSecurity = "🔒"
+	IconDeps     = "⬆️"
+	IconI18n     = "🌐"
+	IconTypo     = "✏️"
+	IconBreaking = "💥"
 )
 
 const (
@@ -45,6 +50,11 @@ const (
 	FACI       = "[ci]"
 	FAChore    = "[chore]"
 	FARevert   = "[revert]"
+	FASecurity = "[security]"
+	FADeps     = "[deps]"
+	FAI18n     = "[i18n]"
+	FATypo     = "[typo]"
+	FABreaking = "[breaking]"
 )
 
 var (
@@ -98,6 +108,11 @@ var commitTypes = []CommitType{
 	{"ci", icon(IconCI, FACI), "Changes to CI/CD configuration"},
 	{"style", icon(IconStyle, FAStyle), "Changes that do not affect the meaning of the code"},
 	{"revert", icon(IconRevert, FARevert), "Revert to a commit"},
+	{"security", icon(IconSecurity, FASecurity), "Fix security issues"},
+	{"deps", icon(IconDeps, FADeps), "Upgrade or downgrade dependencies"},
+	{"i18n", icon(IconI18n, FAI18n), "Internationalization and localization"},
+	{"typo", icon(IconTypo, FATypo), "Fix typos"},
+	{"breaking", icon(IconBreaking, FABreaking), "Changes that break compatibility"},
 }
 
 func SelectCommitType() (CommitType, error) {

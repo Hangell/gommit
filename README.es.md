@@ -11,7 +11,7 @@ Abre un asistente interactivo (similar a Commitizen/cz) y ejecuta `git commit` c
 
 - ✅ Asistente interactivo con búsqueda/atajos (números, palabras clave, `q` para salir)
 - ✅ Tipos estándar de Conventional Commits: **feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert**  
-  Más extras: **WIP, prune**
+  Más extras: **WIP, prune, security, deps, i18n, typo, breaking**
 - ✅ Emojis en el menú (con fallback ASCII automático) y **emoji en el encabezado del commit**
 - ✅ Verificaciones previas de Git:
   - Validación de repositorio (`not a git repository…` si no está en uno)
@@ -145,7 +145,7 @@ Ejemplos:
 ```
 feat 💡: añadir comando install
 fix(api) 🐛: corregir nil pointer en carga de config
-refactor(core)! 🎨: unificar message builder
+refactor(core)! 🦉: unificar message builder
 ```
 
 > El `!` aparece solo en el **encabezado**; la validación interna usa el tipo "puro" (`feat`, `fix`, etc.) para mantener compatibilidad con herramientas de Conventional Commits.
@@ -161,7 +161,7 @@ refactor(core)! 🎨: unificar message builder
 | `--dry-run` | Solo imprime el mensaje generado (no llama a `git commit`) |
 | `--language` | Usa `en`, `es`, `pt`, `hi`, `ru` o `zh` en esta ejecución |
 | `--set-language` | Guarda globalmente el idioma de la interfaz |
-| `--type` | Tipo de commit (feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert, WIP, prune) |
+| `--type` | Tipo de commit (feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert, WIP, prune, security, deps, i18n, typo, breaking) |
 | `--scope` | Scope opcional (ej: `ui`, `api`) |
 | `--subject` | Línea de asunto (modo imperativo, `<=72` chars) |
 | `--body` | Texto del cuerpo (usa `\n` para nuevas líneas) |
@@ -184,15 +184,20 @@ refactor(core)! 🎨: unificar message builder
 | `feat` | 💡 | Una nueva funcionalidad |
 | `fix` | 🐛 | Arreglar un bug |
 | `chore` | 📦 | Actualizar dependencias, despliegues, archivos de configuración |
-| `refactor` | 🎨 | Mejorar estructura/formato del código |
+| `refactor` | 🦉 | Mejorar estructura/formato del código |
 | `prune` | 🔥 | Eliminar código o archivos |
 | `docs` | 📝 | Escribir documentación |
 | `perf` | ⚡ | Mejorar rendimiento |
 | `test` | ✅ | Añadir tests |
 | `build` | 🔧 | Cambios en el sistema de build o dependencias |
 | `ci` | 🤖 | Cambios en configuración de CI/CD |
-| `style` | 💅 | Cambios que no afectan el significado del código |
-| `revert` | ⏪ | Revertir a un commit |
+| `style` | 🎨 | Cambios que no afectan el significado del código |
+| `revert` | ◀️ | Revertir a un commit |
+| `security` | 🔒 | Corregir problemas de seguridad |
+| `deps` | ⬆️ | Actualizar o degradar dependencias |
+| `i18n` | 🌐 | Internacionalización y localización |
+| `typo` | ✏️ | Corregir errores tipográficos |
+| `breaking` | 💥 | Cambios que rompen la compatibilidad |
 
 ---
 
