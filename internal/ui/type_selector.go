@@ -109,7 +109,6 @@ func SelectCommitType() (CommitType, error) {
 	reader := bufio.NewReader(os.Stdin)
 
 	for {
-		clearScreen()
 		displayCommitTypes()
 
 		fmt.Print("\n" + i18n.T("menu.prompt"))
@@ -178,8 +177,10 @@ func selectCommitTypeInteractive() (CommitType, error) {
 	defer term.Restore(fd, oldState)
 
 	selected := 0
-	fmt.Print("\033[?25l")
-	defer fmt.Print("\033[?25h")
+	// Keep redraws on the alternate screen so the shell and its scrollback
+	// survive navigation. Restore the original screen on every return path.
+	fmt.Print("\033[?1049h\033[?25l")
+	defer fmt.Print("\033[?25h\033[?1049l")
 	renderInteractiveTypes(selected)
 
 	one := make([]byte, 1)
@@ -246,8 +247,8 @@ func displayCommitTypes() {
 }
 
 func clearScreen() {
-	// Clear both the visible screen and scrollback, then place the cursor at the top.
-	fmt.Print("\033[2J\033[3J\033[H")
+	// Only clear the alternate screen; never erase terminal scrollback (3J).
+	fmt.Print("\033[2J\033[H")
 }
 
 func icon(emoji, fallback string) string {
