@@ -1,2 +1,7 @@
 # Shell scripts must use Unix line endings, including on Windows checkouts.
 *.sh text eol=lf
+# Keep formatter and workflow inputs stable across platform checkouts.
+*.go text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+Makefile text eol=lf

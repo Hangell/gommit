@@ -220,7 +220,7 @@ git config --global core.editor "gommit --as-editor"
 
 ### सोर्स से बिल्ड
 
-आवश्यकता: Go 1.22+
+आवश्यकता: Go 1.25+
 
 ```bash
 git clone https://github.com/Hangell/gommit.git
@@ -274,6 +274,16 @@ GPL‑3.0‑only — विवरण के लिए [`LICENSE`](LICENSE) द�
 **ऑफ़लाइन चलता है?** हाँ। इंस्टॉल हो जाने के बाद नेटवर्क की ज़रूरत नहीं।
 
 **gommit क्यों बना?** nvm/प्रोजेक्ट‑दर‑प्रोजेक्ट cz इंस्टॉल की झंझट से बचने के लिए—एक सरल, एकीकृत टूल प्रदान करने हेतु।
+
+---
+
+## 🤝 योगदानकर्ता
+
+gommit में योगदान देने वाले सभी लोगों का धन्यवाद।
+
+[![योगदानकर्ता](https://contrib.rocks/image?repo=Hangell/gommit)](https://github.com/Hangell/gommit/graphs/contributors)
+
+[GitHub पर योगदानकर्ताओं की सूची देखें](https://github.com/Hangell/gommit/graphs/contributors) · [contrib.rocks](https://contrib.rocks)
 
 ---
 
