@@ -3,6 +3,7 @@ package git
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"strings"
@@ -11,7 +12,7 @@ import (
 const configModeKey = "gommit.mode"
 const configLanguageKey = "gommit.language"
 
-func ConfiguredLanguage() (string, error) { return globalConfig(configLanguageKey) }
+func ConfiguredLanguage() (string, error) { return ConfigValue(configLanguageKey) }
 func SetConfiguredLanguage(language string) error {
 	cmd := exec.Command("git", "config", "--global", configLanguageKey, language)
 	cmd.Stdout, cmd.Stderr = os.Stdout, os.Stderr
@@ -19,11 +20,11 @@ func SetConfiguredLanguage(language string) error {
 }
 
 func ConfiguredMode() (string, error) {
-	return globalConfig(configModeKey)
+	return ConfigValue(configModeKey)
 }
 
-func globalConfig(key string) (string, error) {
-	out, err := exec.Command("git", "config", "--global", "--get", key).Output()
+func ConfigValue(key string) (string, error) {
+	out, err := exec.Command("git", "config", "--get", key).Output()
 	if err != nil {
 		if ee, ok := err.(*exec.ExitError); ok && ee.ExitCode() == 1 {
 			return "", nil
@@ -48,6 +49,7 @@ type Options struct {
 	Amend      bool
 	NoVerify   bool
 	Signoff    bool
+	Output     io.Writer
 }
 
 func InRepo() bool {
@@ -139,7 +141,10 @@ func CommitWithMessage(msg string, opts Options) error {
 	}
 
 	cmd := exec.Command("git", args...)
-	cmd.Stdout = os.Stdout
+	cmd.Stdout = opts.Output
+	if cmd.Stdout == nil {
+		cmd.Stdout = os.Stdout
+	}
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
 	return cmd.Run()
@@ -148,4 +153,37 @@ func CommitWithMessage(msg string, opts Options) error {
 // Usado no modo --as-editor
 func WriteCommitEditMsg(path, msg string) error {
 	return os.WriteFile(path, []byte(msg), 0o644)
+}
+
+// Root resolves the worktree root even when invoked from a subdirectory.
+func Root() (string, error) {
+	out, err := exec.Command("git", "rev-parse", "--show-toplevel").Output()
+	if err != nil {
+		return "", fmt.Errorf("not a git repository: %w", err)
+	}
+	return strings.TrimSpace(string(out)), nil
+}
+
+func RecentSubjects(limit int) ([]string, error) {
+	out, err := exec.Command("git", "log", "--no-merges", fmt.Sprintf("-%d", limit), "--format=%s").Output()
+	if err != nil {
+		// A valid repository with an unborn branch has no history to infer.
+		if exec.Command("git", "rev-parse", "--verify", "HEAD").Run() != nil {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return strings.Split(strings.TrimSpace(string(out)), "\n"), nil
+}
+
+func ConfigBool(key string) (*bool, error) {
+	out, err := exec.Command("git", "config", "--bool", "--get", key).Output()
+	if err != nil {
+		if ee, ok := err.(*exec.ExitError); ok && ee.ExitCode() == 1 {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("invalid boolean setting %s: %w", key, err)
+	}
+	value := strings.TrimSpace(string(out)) == "true"
+	return &value, nil
 }

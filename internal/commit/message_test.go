@@ -2,7 +2,10 @@
 
 package commit
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestMessageBuild(t *testing.T) {
 	tests := []struct {
@@ -22,5 +25,26 @@ func TestMessageBuild(t *testing.T) {
 				t.Fatalf("Build() = %q, want %q", got, tt.want)
 			}
 		})
+	}
+}
+
+func TestBreakingScopeAndEmoji(t *testing.T) {
+	m := Message{Type: "feat", Scope: "api", Subject: "change", Emoji: "💡", Breaking: true, Footer: "BREAKING CHANGE: new API"}
+	if err := m.Validate(); err != nil {
+		t.Fatal(err)
+	}
+	if got := m.Build(); got != "feat(api)!: 💡 change\n\nBREAKING CHANGE: new API" {
+		t.Fatal(got)
+	}
+}
+func TestConfigurableSubjectLimit(t *testing.T) {
+	if err := (Message{Plain: true, Subject: strings.Repeat("x", 100)}).Validate(); err != nil {
+		t.Fatal(err)
+	}
+	if err := (Message{Type: "fix", Subject: "123456", SubjectLimit: 5}).Validate(); err == nil {
+		t.Fatal("limit ignored")
+	}
+	if err := (Message{Plain: true, Subject: "two\nlines"}).Validate(); err == nil {
+		t.Fatal("multiline subject accepted")
 	}
 }

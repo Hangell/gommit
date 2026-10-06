@@ -3,7 +3,7 @@
 **gommit** 是一个由 Go 编写、**零运行时依赖** 的 _Conventional Commits_ 命令行助手。  
 它提供类似 Commitizen/cz 的交互式向导，并以正确的格式执行 `git commit`。
 
-> 💡 默认在提交 **标题** 中加入 **类型表情**（例如 `feat 💡: ...`），这样图标会在 GitHub 的文件/文件夹列表中可见。表情仅添加到标题，不会进入正文或页脚。
+> 💡 默认在提交 **标题** 中加入 **类型表情**（例如 `feat: 💡 ...`），这样图标会在 GitHub 的文件/文件夹列表中可见。表情仅添加到标题，不会进入正文或页脚。
 
 ---
 
@@ -140,14 +140,14 @@ gommit --type fix --scope api --subject "修复认证问题" --body "修复 JWT 
 ## 📝 标题格式
 
 ```
-<type>[(!)][(scope)] <emoji>: <subject>
+<type>[(scope)][!]: [emoji] <subject>
 ```
 
 示例：
 ```
-feat 💡: 添加安装命令
-fix(api) 🐛: 修正配置加载中的空指针
-refactor(core)! 🦉: 统一消息构建器
+feat: 💡 添加安装命令
+fix(api): 🐛 修正配置加载中的空指针
+refactor(core)!: 🦉 统一消息构建器
 ```
 
 > `!` 只出现在**标题**里；内部校验仍使用“纯类型”（`feat`、`fix` 等），与 Conventional Commits 工具保持兼容。
@@ -245,7 +245,7 @@ go build -ldflags "-s -w -X main.version=0.2.0" -o gommit ./cmd/gommit
 | 变量 | 说明 |
 |---|---|
 | `NO_COLOR=1` | 禁用菜单中的 ANSI 颜色 |
-| `NO_EMOJI=1` | 强制菜单使用 ASCII 回退（标题仍使用 Unicode 表情） |
+| `NO_EMOJI=1` | 禁用生成的标题表情符号，并使用 ASCII 菜单。 |
 
 ---
 
@@ -326,3 +326,13 @@ GPL-3.0-only —— 见 [`LICENSE`](LICENSE)。
 <div align="center">
   <strong>用 ❤️ 为开发者社区打造</strong>
 </div>
+
+## 仓库配置与自动化
+
+使用 `--plain` 或 `-m` 创建普通 Git 消息，使用 `--format conventional` 创建无表情符号的类型化消息，使用 `--format auto` 检测仓库格式。`gommit init` 创建配置，`gommit doctor` 显示检测结果。`--json` 默认禁用交互提示和自动暂存。`--dry-run` 不会修改索引。参阅[英文指南](docs/commit-profiles.md)。
+
+```sh
+gommit init --format conventional
+gommit doctor --json
+gommit --json --format conventional --type fix --subject "Handle empty input" --dry-run
+```
