@@ -1,0 +1,31 @@
+name: Bug report
+description: Report a reproducible problem in gommit.
+body:
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include gommit version, OS/architecture, and Git version.
+      placeholder: "gommit --version; git --version; OS and architecture"
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Provide a minimal example. Remove credentials and private data.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include relevant error messages or terminal output.
+    validations:
+      required: true

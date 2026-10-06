@@ -1,216 +1,227 @@
-# Contribuindo para o **gommit**
+# Contributing to gommit
 
-Obrigado por dedicar seu tempo para contribuir! Este guia explica como planejar mudanças, abrir issues/PRs, configurar o ambiente, seguir o padrão de commits e publicar alterações com segurança.
+Thank you for helping improve gommit! Contributions to code, tests, translations,
+and documentation are welcome.
 
-> **Resumo rápido:**
-> - Linguagem: **Go 1.22+**
-> - Sistema: macOS, Linux e Windows
-> - Estilo de commit: **Conventional Commits**
-> - Licença: **GPL-3.0-only** (todas as contribuições seguem esta licença)
-> - Sem dependências de Node/NPM/NVM — é um **CLI em Go** (binário único)
+## Community and scope
 
----
+Be respectful, constructive, and welcoming in issues and reviews. Search existing
+issues before opening a new one. For a substantial change, open an issue first to
+discuss the problem, proposed behavior, alternatives, and platform impact.
 
-## Sumário
-- [Código de Conduta](#código-de-conduta)
-- [Como posso ajudar?](#como-posso-ajudar)
-- [Ambiente de desenvolvimento](#ambiente-de-desenvolvimento)
-- [Build, testes e lint](#build-testes-e-lint)
-- [Executando localmente](#executando-localmente)
-- [Padrão de commits](#padrão-de-commits)
-- [Estratégia de branches](#estratégia-de-branches)
-- [Processo de Pull Request](#processo-de-pull-request)
-- [Estrutura do projeto](#estrutura-do-projeto)
-- [Versionamento e releases](#versionamento-e-releases)
-- [Segurança e divulgação responsável](#segurança-e-divulgação-responsável)
-- [Licença e cabeçalho SPDX](#licença-e-cabeçalho-spdx)
+For bugs, include your gommit version (`gommit --version`), OS and architecture,
+Git version, reproduction steps, and expected versus actual behavior. Remove
+credentials and private repository information from logs.
 
----
+## Development setup
 
-## Código de Conduta
-Adotamos o **Contributor Covenant**. A participação na comunidade implica concordância com um ambiente acolhedor e respeitoso. Veja `CODE_OF_CONDUCT.md` (se ausente, será adicionado em breve).
+You need Git and **Go 1.25 or newer**, as specified in [go.mod](go.mod). Use the
+latest patch release of your Go version. No Node.js or npm installation is needed.
+GNU Make and a POSIX shell are optional shortcuts for running checks; on Windows,
+you can use Git Bash with Make or run the Go commands below directly.
 
----
+Fork the repository, then clone your fork:
 
-## Como posso ajudar?
-- **Bugs**: abra uma *issue* com passos para reproduzir, logs, plataforma (SO/arquitetura) e versão do `gommit`.
-- **Features**: descreva o problema real a ser resolvido, alternativas consideradas e impacto esperado. Propostas maiores → use o rótulo **RFC**.
-- **Docs**: melhorias no `README`, `CONTRIBUTING`, exemplos, gifs e correções gramaticais são bem-vindas.
-
-> Dica: problemas “good first issue” e “help wanted” facilitam a entrada.
-
----
-
-## Ambiente de desenvolvimento
-**Pré‑requisitos**
-- Go **1.22+**
-- Git
-- (Opcional) `golangci-lint`, `staticcheck`, `goreleaser`
-
-**Clonar e preparar**
-```bash
-# 1) Fork no GitHub e clone seu fork
- git clone https://github.com/<seu-usuario>/gommit
- cd gommit
-
-# 2) Configure o módulo (se necessário) e baixe deps
- go mod tidy
+```sh
+git clone https://github.com/<your-username>/gommit.git
+cd gommit
+git remote add upstream https://github.com/Hangell/gommit.git
+go mod download
+git switch -c feat/your-change
 ```
 
-> Este projeto **não** depende de Node/NPM/NVM.
+Use focused branches such as `feat/your-change`, `fix/your-change`, or
+`docs/your-change`, and keep pull requests small enough to review.
 
----
+## Build and run
 
-## Build, testes e lint
-**Build local**
-```bash
-# compila o binário para sua plataforma
-go build ./cmd/gommit
+```sh
+go build -o bin/gommit ./cmd/gommit
+# On Windows, use: go build -o bin/gommit.exe ./cmd/gommit
+go run ./cmd/gommit --help
+go run ./cmd/gommit --version
 ```
 
-**Testes**
-```bash
-go test ./...
-# cobertura (opcional)
-go test ./... -coverprofile=coverage.out && go tool cover -func=coverage.out
+Test the commit wizard in a disposable Git repository. gommit can automatically
+stage changes, and `--dry-run` still reaches the staging logic. To preview a message
+without staging or creating a commit, use a temporary repository with:
+
+```sh
+/path/to/gommit/bin/gommit --dry-run --allow-empty --auto-stage=false --type feat --subject "add example"
 ```
 
-**Lint (mínimo razoável)**
-```bash
-# verificação estática padrão do Go
+For Git editor integration, set the editor only for one command in that temporary
+repository (use the absolute path to the binary):
+
+```sh
+git -c core.editor='"/absolute/path/to/gommit/bin/gommit" --as-editor' commit
+```
+
+## Tests and validators
+
+Run all checks before submitting a pull request:
+
+```sh
+make check
+```
+
+The individual targets are:
+
+| Target | Purpose |
+| --- | --- |
+| `make fmt` | Format Go source files (writes changes). |
+| `make fmt-check` | Reject unformatted Go source files. |
+| `make mod-check` | Check module tidiness without changing files and verify downloaded modules. |
+| `make lint` | Run `go vet` and validate GitHub Actions workflows with actionlint. |
+| `make test` | Run uncached tests with the race detector and generate `coverage.out`. |
+| `make build` | Build all packages for the current platform. |
+| `make vuln-check` | Check reachable known vulnerabilities with govulncheck. |
+
+Without Make, run these equivalent commands from the repository root:
+
+```sh
+gofmt -l cmd internal platform
+# The command above must print no files. To fix formatting:
+# gofmt -w cmd internal platform
+go mod tidy -diff
+go mod verify
 go vet ./...
+go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12 -shellcheck=""
+go test -race -count=1 -coverprofile=coverage.out ./...
+go build ./...
+go run golang.org/x/vuln/cmd/govulncheck@v1.7.0 ./...
+go tool cover -func=coverage.out
 ```
 
-> Se usar `golangci-lint` ou `staticcheck`, mantenha os findings relevantes no PR.
+Validator versions are pinned in [Makefile](Makefile). Running them for the first
+time requires network access; govulncheck also reads the Go vulnerability database.
+The race detector requires a supported platform and C compiler (on Windows, a
+compatible MinGW-w64 toolchain). If unavailable locally, run `go test -count=1
+./...` and disclose that limitation in your PR; CI runs the race checks.
 
----
+CI runs formatting, module, vet, workflow, and vulnerability checks, executes tests
+on Linux, macOS, and Windows, and cross-compiles Linux/macOS/Windows binaries for
+amd64 and arm64. Release builds depend on the quality and test jobs passing.
+Linux coverage is available as the `coverage` workflow artifact.
 
-## Executando localmente
-**Modo assistente manual**
-```bash
-# no diretório do projeto (após build)
-./gommit commit
+### Writing tests
+
+Add regression tests for bug fixes and tests for new behavior. Cover relevant
+failure cases, Unicode input, and platform differences. Prefer table-driven tests
+for message validation. Use temporary files and repositories for filesystem and
+Git tests; isolate Git configuration and avoid network access, real commits in the
+contributor's checkout, and changes to global user settings.
+
+Translation changes should preserve all English keys and formatting placeholders.
+Tests that change the active language must restore it before returning.
+
+## Commit messages and sign-off
+
+Use Conventional Commits:
+
+```text
+<type>(<optional scope>): <subject>
+
+<optional body>
+
+<optional footer>
 ```
 
-**Integrar como editor do Git (recomendado para testes)**
-- macOS/Linux:
-  ```bash
-  git config --global core.editor "$(pwd)/gommit --as-editor"
-  ```
-- Windows (CMD):
-  ```bat
-  git config --global core.editor "\"%CD%\\gommit.exe\" --as-editor"
-  ```
-- Windows (PowerShell):
-  ```powershell
-  git config --global core.editor '"%CD%\gommit.exe" --as-editor'
-  ```
+Common types include `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`,
+`build`, `ci`, `chore`, and `revert`. Write a clear imperative subject of at most
+72 characters. For breaking changes, add `!` to the header and explain the change
+in a `BREAKING CHANGE:` body or footer. Link issues with `Closes #123` or `Refs #123`.
 
-Agora, em qualquer repositório:
-```bash
-git add .
-git commit  # abre o wizard do gommit
+Sign off your commits with `git commit -s` to certify the
+[Developer Certificate of Origin](https://developercertificate.org/):
+
+```sh
+git commit -s -m "test(commit): cover Unicode subject limits"
 ```
 
-> Para reverter: `git config --global --unset core.editor`.
+A DCO sign-off is a `Signed-off-by` trailer, not a cryptographic signature. gommit
+also supports `--signoff`.
 
----
+## Pull requests and review
 
-## Padrão de commits
-Seguimos **Conventional Commits**. O `gommit` ajuda nesse fluxo, mas PRs devem respeitar o formato:
+1. Explain the problem, resulting behavior, and any compatibility impact using the
+   PR template. Link the relevant issue.
+2. Include tests and update documentation or translations when behavior changes.
+3. Run the checks above and describe the validation you performed.
+4. Open your PR against `main`; use a draft while work is in progress.
+5. Address review feedback and failing CI checks. Maintainers make merge decisions.
 
-**Formato**
-```
-<type>(<scope>)!: <subject>
+### CodeRabbit
 
-<body>
+[.coderabbit.yaml](.coderabbit.yaml) configures English reviews, automatic reviews
+of non-draft PRs, incremental reviews after pushes, and project-specific guidance.
+CodeRabbit complements CI and maintainer review. Its GitHub App must be installed
+and enabled for `Hangell/gommit` by a repository administrator before reviews can
+run; the YAML file alone does not install the app. See the
+[official setup guide](https://docs.coderabbit.ai/getting-started/quickstart).
 
-<footer>
-```
+Maintainers can configure branch protection on `main` to require `Quality`,
+`Test (ubuntu-latest)`, `Test (macos-latest)`, and `Test (windows-latest)`, plus a
+human review. These repository settings are separate from the checked-in workflow.
+Dependabot proposes weekly Go module and GitHub Actions updates.
 
-**Tipos aceitos (MVP)**: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`.
+## Contributor recognition
 
-**Regras rápidas**
-- `<subject>` no imperativo e preferencialmente ≤ **72** caracteres.
-- Use `!` em *breaking changes* e inclua `BREAKING CHANGE:` no body/footer.
-- Relacione issues no footer: `Closes #123`, `Refs #456`.
-- Co-autoria: `Co-authored-by: Nome <email>`.
+The README includes contributor avatars from [contrib.rocks](https://contrib.rocks)
+and links to the [GitHub contributor list](https://github.com/Hangell/gommit/graphs/contributors).
+The image is generated from GitHub's contributor data and may take time to refresh.
+Commit-based recognition includes code, tests, documentation, and translations.
+Use a commit email associated with your GitHub account so GitHub can attribute your
+commits. See [GitHub's contributor documentation](https://docs.github.com/en/repositories/viewing-activity-and-data-for-your-repository/viewing-a-projects-contributors).
 
-**Exemplos**
-```
-feat(ui): add scope suggestions from staged paths
+To list contributors in a local checkout, run:
 
-Suggest top-level folders as commit scope based on `git diff --cached --name-only`.
-
-Closes #42
-```
-```
-fix(editor)!: prevent overwriting merge commit messages
-
-BREAKING CHANGE: editor flow now aborts when COMMIT_EDITMSG contains meaningful content.
-```
-
----
-
-## Estratégia de branches
-- **main**: estável.
-- **feature branches**: `feat/<slug>`, `fix/<slug>`, `chore/<slug>`.
-- Evite PRs gigantes. Prefira mudanças pequenas e revisáveis.
-
----
-
-## Processo de Pull Request
-1. **Abra uma issue** (quando a mudança não for trivial) e alinhe o escopo.
-2. **Implemente** com testes quando fizer sentido.
-3. **Rodar checks locais**: `go vet`, `go test ./...`.
-4. **Commits**: use o `gommit` ou siga o padrão manualmente.
-5. **Assinatura (DCO)**: assine seus commits com `-s` (Developer Certificate of Origin).
-   ```bash
-   git commit -s -m "feat: ..."
-   ```
-6. **PR**: descreva o *rationale*, evidencie impactos, screenshots/gifs quando UI do terminal mudar.
-7. **Review**: esteja aberto a feedbacks (pequenos refinamentos são comuns).
-
-Checklist para o PR:
-- [ ] Tests passam em `go test ./...`
-- [ ] Mensagem de commit segue o padrão
-- [ ] Cobertura razoável (quando aplicável)
-- [ ] Documentação/README atualizada (se mudou UX/flags)
-
----
-
-## Estrutura do projeto
-```
-cmd/gommit/main.go   # ponto de entrada do CLI
-internal/commit      # montagem da mensagem, validações
-internal/ui          # prompts/wizard (stdin/stdout), i18n
-internal/git         # integrações com Git (rev-parse, diff, commit -F)
-internal/config      # ./.gommit.json e ~/.gommit.json (futuro)
-internal/editor      # fluxo --as-editor
-internal/hook        # instalação de hooks (opcional)
-assets/              # logo.svg, demo.gif
+```sh
+make contributors
+# Or, without Make:
+git shortlog --group=author --group=trailer:co-authored-by -sn HEAD
 ```
 
----
+This lists names and commit counts from the checked-out history, including
+`Co-authored-by` trailers. The [.mailmap](.mailmap) file consolidates author aliases;
+propose an entry there if your own name appears more than once. For shared work,
+include the co-author's name and associated commit email in the commit footer:
 
-## Versionamento e releases
-- **SemVer** para tags: `vMAJOR.MINOR.PATCH`.
-- Releases oficiais são criadas pelos mantenedores (GoReleaser).
-- Para propor uma release, abra uma issue com changelog proposto.
+```text
+Co-authored-by: Contributor Name <contributor@example.com>
+```
 
----
+Credit for co-authorship is separate from each contributor's DCO sign-off.
+For contributions through issues, reviews, or other work without commits, describe
+the contribution in the related issue or PR so maintainers can acknowledge it.
 
-## Segurança e divulgação responsável
-Se você encontrar uma vulnerabilidade, **não** abra uma issue pública de imediato. Envie um e‑mail para o(s) mantenedor(es) com detalhes e passos de reprodução. Daremos retorno e coordenaremos a correção antes da divulgação.
+## Project layout
 
----
+```text
+cmd/gommit/       CLI entry point, flags, and wizard orchestration
+internal/commit/  Commit message construction and validation
+internal/git/     Git command integration
+internal/i18n/    Locales, language selection, and translations
+internal/install/ Binary installation for Unix and Windows
+internal/ui/      Terminal prompts and commit type selection
+internal/update/  Release lookup and binary updates
+platform/         Platform-specific console handling
+scripts/          Shell and PowerShell installers
+.github/          CI, contribution template, and dependency updates
+```
 
-## Licença e cabeçalho SPDX
-- Este projeto é licenciado sob **GPL-3.0-only** (veja `LICENSE`).
-- Inclua o cabeçalho SPDX nos arquivos novos/modificados:
-  ```go
-  // SPDX-License-Identifier: GPL-3.0-only
-  ```
+## Releases, security, and license
 
-Obrigado por contribuir! 🎉
+Maintainers publish SemVer tags (`vMAJOR.MINOR.PATCH`). The GitHub Actions release
+job packages binaries and publishes checksums for version tags after checks pass.
 
+Report vulnerabilities privately to the maintainer through a private contact
+listed on their GitHub profile, or GitHub private vulnerability reporting if it is
+enabled. Do not disclose exploit details in a public issue before coordination.
+
+Contributions are licensed under **GPL-3.0-only**; see [LICENSE](LICENSE). Add this
+header to new Go source files:
+
+```go
+// SPDX-License-Identifier: GPL-3.0-only
+```

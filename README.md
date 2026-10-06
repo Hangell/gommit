@@ -239,7 +239,7 @@ This will open the `gommit` wizard whenever Git needs a commit message (includin
 
 ### Building from Source
 
-Requirements: Go 1.22+
+Requirements: Go 1.25+
 
 ```bash
 # Clone the repository
@@ -276,11 +276,9 @@ go build -ldflags "-s -w -X main.version=0.2.0" -o gommit ./cmd/gommit
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes using `gommit` 😉
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+Read [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, tests, validators,
+commit sign-off, and the pull request process. Run `make check` before submitting
+a contribution. CodeRabbit review settings are in [.coderabbit.yaml](.coderabbit.yaml).
 
 ---
 
@@ -302,13 +300,15 @@ GPL-3.0-only — see [`LICENSE`](LICENSE) file for details.
 
 ---
 
-## 🤝 Contributing
+## 🤝 Contributors
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes using `gommit` 😉
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+Thank you to everyone who contributes to gommit!
+
+[![Contributors](https://contrib.rocks/image?repo=Hangell/gommit)](https://github.com/Hangell/gommit/graphs/contributors)
+
+[View contributors on GitHub](https://github.com/Hangell/gommit/graphs/contributors) · [contrib.rocks](https://contrib.rocks)
+
+---
 
 ## 👨‍💻 Author
 

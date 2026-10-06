@@ -220,7 +220,7 @@ git config --global core.editor "gommit --as-editor"
 
 ### Сборка из исходников
 
-Требования: Go 1.22+
+Требования: Go 1.25+
 
 ```bash
 git clone https://github.com/Hangell/gommit.git
@@ -274,6 +274,16 @@ GPL‑3.0‑only — см. файл [`LICENSE`](LICENSE) для подробно
 **Работает офлайн?** Да. После установки сети не требуется.
 
 **Почему появился gommit?** Из‑за рутины с nvm/множественными установками cz на разных версиях/проектах. gommit — более простой единый инструмент.
+
+---
+
+## 🤝 Участники
+
+Спасибо всем, кто вносит вклад в gommit!
+
+[![Участники](https://contrib.rocks/image?repo=Hangell/gommit)](https://github.com/Hangell/gommit/graphs/contributors)
+
+[Посмотреть участников на GitHub](https://github.com/Hangell/gommit/graphs/contributors) · [contrib.rocks](https://contrib.rocks)
 
 ---
 

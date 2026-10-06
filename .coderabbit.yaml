@@ -1,0 +1,28 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: en-US
+reviews:
+  profile: chill
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  auto_review:
+    enabled: true
+    auto_incremental_review: true
+    drafts: false
+  path_instructions:
+    - path: "**/*.go"
+      instructions: >-
+        Review correctness, error handling, Unicode commit messages, and Windows,
+        Linux, and macOS compatibility. Request regression tests for behavior changes.
+        Git integration tests must use temporary repositories and isolated configuration.
+        Avoid changing the contributor's global Git settings in tests.
+    - path: "internal/i18n/**"
+      instructions: >-
+        Check that every locale includes the English message keys and preserves
+        formatting placeholders. Tests that change the active language must restore it.
+    - path: ".github/workflows/**"
+      instructions: >-
+        Check least-privilege permissions, safe handling of untrusted pull requests,
+        Go version compatibility with go.mod, and that releases depend on passing checks.
+chat:
+  auto_reply: true

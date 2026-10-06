@@ -220,7 +220,7 @@ git config --global core.editor "gommit --as-editor"
 
 ### 从源码构建
 
-要求：Go 1.22+
+要求：Go 1.25+
 
 ```bash
 git clone https://github.com/Hangell/gommit.git
@@ -274,6 +274,16 @@ GPL-3.0-only —— 见 [`LICENSE`](LICENSE)。
 **可离线使用吗？** 可以。安装完成后无需网络。
 
 **为什么要做 gommit？** 为避免在 nvm/不同项目里反复安装 cz 与适配器，提供一个更简单统一的方案。
+
+---
+
+## 🤝 贡献者
+
+感谢所有为 gommit 做出贡献的人！
+
+[![贡献者](https://contrib.rocks/image?repo=Hangell/gommit)](https://github.com/Hangell/gommit/graphs/contributors)
+
+[在 GitHub 上查看贡献者](https://github.com/Hangell/gommit/graphs/contributors) · [contrib.rocks](https://contrib.rocks)
 
 ---
 

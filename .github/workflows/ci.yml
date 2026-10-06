@@ -10,28 +10,59 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
-  test:
-    name: Test
+  quality:
+    name: Quality
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25.x'
+          cache: true
+      - name: Validate formatting, modules, Go code, and workflows
+        run: make fmt-check mod-check lint
+      - name: Check known vulnerabilities
+        run: make vuln-check
+
+  test:
+    name: Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-go@v5
         with:
-          go-version: '>=1.22'
+          go-version: '1.25.x'
           cache: true
 
       - name: Build (sanity)
         run: go build ./...
 
       - name: Test
-        run: go test ./...
+        run: go test -race -count=1 -coverprofile=coverage.out ./...
+
+      - name: Upload coverage
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage.out
+          if-no-files-found: error
 
   build:
     name: Build (${{ matrix.os }}-${{ matrix.arch }})
     runs-on: ubuntu-latest
-    needs: test
+    needs: [quality, test]
     strategy:
       fail-fast: false
       matrix:
@@ -46,7 +77,7 @@ jobs:
 
       - uses: actions/setup-go@v5
         with:
-          go-version: '>=1.22'
+          go-version: '1.25.x'
           cache: true
 
       - name: Compute VERSION
@@ -90,7 +121,7 @@ jobs:
 
           mkdir "$NAME"
           cp "$BIN" "$NAME/"
-          
+
           # Incluir docs (se existirem no repo)
           for f in ../README.md ../LICENSE ../CONTRIBUTING.md; do
             [[ -f "$f" ]] && cp "$f" "$NAME/" || true
@@ -106,13 +137,13 @@ jobs:
             ASSET_PATH="${NAME}.tar.gz"
             echo "✅ Created Unix package: $ASSET_PATH"
           fi
-          
+
           # Verificar se o pacote foi criado
           if [[ ! -f "$ASSET_PATH" ]]; then
             echo "❌ Package creation failed: $ASSET_PATH"
             exit 1
           fi
-          
+
           echo "asset=$ASSET_PATH" >> "$GITHUB_OUTPUT"
           echo "package_name=$NAME" >> "$GITHUB_OUTPUT"
 
@@ -136,6 +167,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: dist
+          pattern: gommit_*
           merge-multiple: true
 
       - name: List downloaded files
@@ -143,14 +175,14 @@ jobs:
         run: |
           echo "📦 Downloaded artifacts:"
           find dist -type f -name "*.tar.gz" -o -name "*.zip" | sort
-          
+
       - name: Generate checksums
         shell: bash
         run: |
           cd dist
           shopt -s nullglob
           rm -f SHA256SUMS.txt
-          
+
           echo "🔐 Generating checksums..."
           for f in *.tar.gz *.zip; do
             if [[ -f "$f" ]]; then
@@ -158,7 +190,7 @@ jobs:
               echo "✅ $f"
             fi
           done
-          
+
           if [[ -f SHA256SUMS.txt ]]; then
             echo ""
             echo "📋 SHA256 checksums:"

@@ -217,7 +217,7 @@ Esto abrirá el asistente `gommit` cuando Git necesite un mensaje de commit (inc
 
 ### Construir desde el Código Fuente
 
-Requisitos: Go 1.22+
+Requisitos: Go 1.25+
 
 ```bash
 # Clonar el repositorio
@@ -277,6 +277,16 @@ GPL-3.0-only — ver archivo [`LICENSE`](LICENSE) para detalles.
 **¿Funciona offline?** Sí. Una vez instalado, no necesita acceso a internet para ejecutar el asistente o hacer commit.
 
 **¿Por qué se creó gommit?** La idea nació de la frustración con entornos nvm donde teníamos que instalar `git-cz` para cada versión de nvm o directamente en cada proyecto. gommit es mucho más simple y proporciona una solución única y unificada.
+
+---
+
+## 🤝 Colaboradores
+
+¡Gracias a todas las personas que contribuyen a gommit!
+
+[![Colaboradores](https://contrib.rocks/image?repo=Hangell/gommit)](https://github.com/Hangell/gommit/graphs/contributors)
+
+[Ver colaboradores en GitHub](https://github.com/Hangell/gommit/graphs/contributors) · [contrib.rocks](https://contrib.rocks)
 
 ---
 

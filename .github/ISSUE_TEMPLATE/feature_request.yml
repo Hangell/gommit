@@ -1,0 +1,22 @@
+name: Feature request
+description: Propose an improvement to gommit.
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve
+      description: Describe your use case and why the current behavior is insufficient.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Explain how this would work for a gommit user.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives and platform impact
+      description: Include alternatives considered and Windows/macOS/Linux implications.

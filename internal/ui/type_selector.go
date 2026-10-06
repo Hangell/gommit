@@ -128,7 +128,7 @@ func SelectCommitType() (CommitType, error) {
 
 		fmt.Print("\n" + i18n.T("menu.prompt"))
 		input, err := reader.ReadString('\n')
-		if err != nil {
+		if err != nil && !(errors.Is(err, io.EOF) && len(input) > 0) {
 			if errors.Is(err, io.EOF) {
 				return CommitType{}, fmt.Errorf("selection aborted (EOF)")
 			}
