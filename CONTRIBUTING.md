@@ -87,7 +87,7 @@ go mod tidy -diff
 go mod verify
 go vet ./...
 go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12 -shellcheck=""
-go test -race -count=1 -coverprofile=coverage.out ./...
+go test -race -count=1 "-coverprofile=coverage.out" ./...
 go build ./...
 go run golang.org/x/vuln/cmd/govulncheck@v1.7.0 ./...
 go tool cover -func=coverage.out
@@ -160,9 +160,13 @@ and enabled for `Hangell/gommit` by a repository administrator before reviews ca
 run; the YAML file alone does not install the app. See the
 [official setup guide](https://docs.coderabbit.ai/getting-started/quickstart).
 
-Maintainers can configure branch protection on `main` to require `Quality`,
-`Test (ubuntu-latest)`, `Test (macos-latest)`, and `Test (windows-latest)`, plus a
-human review. These repository settings are separate from the checked-in workflow.
+The active `Protect main` ruleset requires pull requests, resolved review
+conversations, an up-to-date branch, and the GitHub Actions checks `Quality`,
+`Test (ubuntu-latest)`, `Test (macos-latest)`, and `Test (windows-latest)`.
+It blocks force pushes and deletion of the default branch (currently `main`).
+There are no bypass actors. Human approvals are optional while the repository has
+one maintainer; maintainers can require an approval when another reviewer is
+available. These repository settings are separate from the checked-in workflow.
 Dependabot proposes weekly Go module and GitHub Actions updates.
 
 ## Contributor recognition
