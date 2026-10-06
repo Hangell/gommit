@@ -3,7 +3,7 @@
 **gommit** es un asistente de línea de comandos rápido y sin dependencias para _Conventional Commits_, escrito en Go.  
 Abre un asistente interactivo (similar a Commitizen/cz) y ejecuta `git commit` con el mensaje correctamente formateado.
 
-> 💡 Por defecto, **emojis de tipo de commit** se incluyen **en el encabezado** (ej: `feat 💡: ...`) para hacerlos visibles en las listas de archivos/carpetas de GitHub. Los emojis solo se añaden al título, no al cuerpo o pie de página.
+> 💡 Por defecto, **emojis de tipo de commit** se incluyen **en el encabezado** (ej: `feat: 💡 ...`) para hacerlos visibles en las listas de archivos/carpetas de GitHub. Los emojis solo se añaden al título, no al cuerpo o pie de página.
 
 ---
 
@@ -138,14 +138,14 @@ gommit --type fix --scope api --subject "resolver problema de autenticación" --
 ## 📝 Formato del Encabezado del Commit
 
 ```
-<type>[(!)][(scope)] <emoji>: <subject>
+<type>[(scope)][!]: [emoji] <subject>
 ```
 
 Ejemplos:
 ```
-feat 💡: añadir comando install
-fix(api) 🐛: corregir nil pointer en carga de config
-refactor(core)! 🦉: unificar message builder
+feat: 💡 añadir comando install
+fix(api): 🐛 corregir nil pointer en carga de config
+refactor(core)!: 🦉 unificar message builder
 ```
 
 > El `!` aparece solo en el **encabezado**; la validación interna usa el tipo "puro" (`feat`, `fix`, etc.) para mantener compatibilidad con herramientas de Conventional Commits.
@@ -248,7 +248,7 @@ go build -ldflags "-s -w -X main.version=0.2.0" -o gommit ./cmd/gommit
 | Variable | Descripción |
 |---|---|
 | `NO_COLOR=1` | Deshabilita colores ANSI en el menú |
-| `NO_EMOJI=1` | Fuerza fallback ASCII en el menú (encabezado aún usa emojis unicode) |
+| `NO_EMOJI=1` | Desactiva emojis del encabezado y usa el menú ASCII. |
 
 ---
 
@@ -329,3 +329,13 @@ GPL-3.0-only — ver archivo [`LICENSE`](LICENSE) para detalles.
 <div align="center">
   <strong>Hecho con ❤️ para la comunidad de desarrolladores</strong>
 </div>
+
+## Perfiles y automatización
+
+Usa `--plain` o `-m` para mensajes normales, `--format conventional` para tipos sin emojis y `--format auto` para detectar el formato. `gommit init` crea la configuración y `gommit doctor` muestra el perfil. `--json` no solicita entradas ni añade archivos automáticamente por defecto. `--dry-run` no modifica el índice. Consulta la [guía en inglés](docs/commit-profiles.md).
+
+```sh
+gommit init --format conventional
+gommit doctor --json
+gommit --json --format conventional --type fix --subject "Handle empty input" --dry-run
+```

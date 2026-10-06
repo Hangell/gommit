@@ -13,7 +13,7 @@
 **gommit** is a fast, zero-dependency command-line assistant for _Conventional Commits_, written in Go.  
 It opens an interactive wizard (similar to Commitizen/cz) and executes `git commit` with the properly formatted message.
 
-> 💡 By default, **commit type emojis** are included **in the header** (e.g., `feat 💡: ...`) to make them visible in GitHub's file/folder listings. Emojis are only added to the title, not to the body or footer.
+> 💡 By default, **commit type emojis** are included **in the header** (e.g., `feat: 💡 ...`) to make them visible in GitHub's file/folder listings. Emojis are only added to the title, not to the body or footer.
 
 ---
 
@@ -157,14 +157,14 @@ gommit --type fix --scope api --subject "resolve authentication issue" --body "F
 ## 📝 Commit Header Format
 
 ```
-<type>[(!)][(scope)] <emoji>: <subject>
+<type>[(scope)][!]: [emoji] <subject>
 ```
 
 Examples:
 ```
-feat 💡: add install command
-fix(api) 🐛: correct nil pointer on config load
-refactor(core)! 🦉: unify message builder
+feat: 💡 add install command
+fix(api): 🐛 correct nil pointer on config load
+refactor(core)!: 🦉 unify message builder
 ```
 
 > The `!` appears only in the **header**; internal validation uses the "pure" type (`feat`, `fix`, etc.) to maintain compatibility with Conventional Commits tools.
@@ -270,7 +270,7 @@ go build -ldflags "-s -w -X main.version=0.2.0" -o gommit ./cmd/gommit
 | Variable | Description |
 |---|---|
 | `NO_COLOR=1` | Disable ANSI colors in menu |
-| `NO_EMOJI=1` | Force ASCII fallback in menu (header still uses unicode emojis) |
+| `NO_EMOJI=1` | Disable generated header emojis; use ASCII menu fallback. |
 
 ---
 
@@ -355,3 +355,13 @@ GPL-3.0-only — see [`LICENSE`](LICENSE) file for details.
 <div align="center">
   <strong>Made with ❤️ for the developer community</strong>
 </div>
+
+## Repository profiles and automation
+
+Use `--plain` or `-m` for a normal Git message, `--format conventional` for typed messages without emojis, and `--format auto` to discover the repository convention. `gommit init` creates a shared configuration; `gommit doctor` explains the detected profile. `--json` disables prompts and automatic staging by default. `--dry-run` never changes the index. See the [full guide](docs/commit-profiles.md).
+
+```sh
+gommit init --format conventional
+gommit doctor --json
+gommit --json --format conventional --type fix --subject "Handle empty input" --dry-run
+```

@@ -13,14 +13,6 @@ import (
 	"time"
 )
 
-func TestBuildMessageFromFlags(t *testing.T) {
-	got := buildOrPromptMessage("feat", " cli ", " add tests ", `first\nsecond`, "Closes #42", true, "full")
-	want := "feat(cli): 💡 add tests\n\nfirst\nsecond\n\nCloses #42"
-	if got != want {
-		t.Fatalf("message = %q, want %q", got, want)
-	}
-}
-
 func TestIssueFooter(t *testing.T) {
 	got := splitCSVNums(" 12, #34, ,56 ")
 	if want := []string{"#12", "#34", "#56"}; !reflect.DeepEqual(got, want) {

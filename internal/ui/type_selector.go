@@ -116,12 +116,16 @@ var commitTypes = []CommitType{
 }
 
 func SelectCommitType() (CommitType, error) {
+	return SelectCommitTypeWithReader(bufio.NewReader(os.Stdin))
+}
+
+// SelectCommitTypeWithReader preserves buffered input for subsequent wizard prompts.
+func SelectCommitTypeWithReader(reader *bufio.Reader) (CommitType, error) {
 	if term.IsTerminal(int(os.Stdin.Fd())) {
 		return selectCommitTypeInteractive()
 	}
 
 	// Se stdin não é TTY (pipe), ainda vamos tentar ler uma linha.
-	reader := bufio.NewReader(os.Stdin)
 
 	for {
 		displayCommitTypes()

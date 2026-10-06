@@ -43,11 +43,11 @@ go run ./cmd/gommit --version
 ```
 
 Test the commit wizard in a disposable Git repository. gommit can automatically
-stage changes, and `--dry-run` still reaches the staging logic. To preview a message
-without staging or creating a commit, use a temporary repository with:
+stage changes during a real commit. `--dry-run` validates and previews the message
+without staging, writing editor files, or creating a commit:
 
 ```sh
-/path/to/gommit/bin/gommit --dry-run --allow-empty --auto-stage=false --type feat --subject "add example"
+/path/to/gommit/bin/gommit --dry-run --type feat --subject "add example"
 ```
 
 For Git editor integration, set the editor only for one command in that temporary
@@ -228,4 +228,15 @@ header to new Go source files:
 
 ```go
 // SPDX-License-Identifier: GPL-3.0-only
+```
+
+## Repository profiles
+
+See [repository profiles and automation](docs/commit-profiles.md) for plain Git
+messages, configuration, detection, and JSON output. Add regression tests for
+changes to staging, hooks, editor mode, and configuration precedence. The profile
+parser also has a fuzz target:
+
+```sh
+go test ./internal/profile -fuzz=FuzzInfer -fuzztime=10s -parallel=2
 ```
